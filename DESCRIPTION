@@ -1,0 +1,13 @@
+Package: tf2statr
+Type: Package
+Title: Scraping TF2 Stats to get Aggregate Insights
+Version: 0.1.0
+Date: 2015-08-29
+Author: Siddarta Jairam
+Maintainer: Siddarta Jairam <sidjsb@gmail.com>
+Description: logs.tf and sizzling stats are great match stats plugins however
+  sometimes tournatment or season long stats are needed. Additionally, searching
+  terms for teams and tournaments are hard to find having to traverse multiple
+  websites and APIs. Even for single matches, this package
+  parses the information into R for further analysis.
+License: GPL (>= 2)
