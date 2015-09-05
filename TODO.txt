@@ -1,0 +1,21 @@
+#Short term
+
+- Tournament / season support
+-- i series
+-- esea NA 6s
+-- eft2l EU 6s
+-- UGC NA Highlander
+
+
+#Long Term
+
+- add support for sizzling stats
+
+- rmd file to create "media notes"
+-- use the past 3 matches for each player and the team
+-- per map stats as well
+
+- create a stat like "wins above replacement" for TF2
+-- specialize for each class "roamer, demo"
+--- characterize roamer using heal percentage
+-- use it to determine how much success is based on individual effort vs team chemistry or heads up plays not reflected in the stat line.

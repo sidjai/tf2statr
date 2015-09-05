@@ -4,24 +4,24 @@ getLogIDs <- function(title = "", uploader = "", player = "", num = 10){
     tokens <- paste0("title=", title)
   }
   if(nzchar(uploader)){
-    tokens <- paste0("uploader=", title)
+    tokens <- paste0("uploader=", uploader)
   }
   if(nzchar(player)){
-    tokens <- paste0("player=", title)
+    tokens <- paste0("player=", player)
   }
 
   if(length(tokens) == 0){
     stop("Please supply a search parameter of either a title or an uploader")
   }
-  tokens <- c(tokens, paste0("N=", num))
-  jsonSearch <- paste0("http://logs.tf/json_search?", paste(tokens, collapse = "&")))
+  tokens <- c(tokens, paste0("limit=", num))
+  jsonSearch <- paste0("http://logs.tf/json_search?", paste(tokens, collapse = "&"))
   return(parseJSONSearch(jsonSearch, num))
 
 
 }
 
 parseJSONSearch <- function(searchUrl, reqNum){
-  query <- fromJSON(searchUrl)
+  query <- jsonlite::fromJSON(searchUrl)
   if(!query$success){
     stop(paste(
       "The search:",
