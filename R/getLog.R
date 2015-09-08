@@ -48,12 +48,17 @@ getLog <- function(
   plyMat <- cbind(plyMat, dmgPerVec, percentVec, cleanUpVec)
   colnames(plyMat) <- finNames
 
-  if(length(altNames) == dim(plyMat)[2]){
-  	rownames(plyMat) <- altNames
-  } else if(length(altNames) > 1){
-  	stop(paste(
-  		"Please provide Alternative names for all the players, you provided",
-  		altNames, sep = "\n"))
+  if(length(altNames) > 0){
+    altNums <- match(names(altNames), rownames(plyMat))
+    if(any(is.na(altNums))){
+      stop(paste("These names did not have matches in this log:",
+      altNames[is.na(altNums)],
+      "Check the steam ID", sep = "/n"))
+    }
+
+    newNames <- rownames(plyMat)
+    newNames[altNums] <- altNames
+  	rownames(plyMat) <- newNames
   }
 
   niceMatch$table <- plyMat
