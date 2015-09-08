@@ -8,6 +8,9 @@ test_that("Get steam ID from tf.tv username",{
   expect_equal(qs[2,1], "")
   expect_equal(qs[2,2], "")
 
+  tmp <- function(){ addPlayerQs(qs) <- "LuckyLuk"}
+  expect_error(tmp(), "'LuckyLuk' is not a real tf.tv username")
+
 })
 
 test_that("notUnique actually does && right", {

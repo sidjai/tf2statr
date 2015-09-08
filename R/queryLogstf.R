@@ -42,7 +42,11 @@ queryLogstf <- function(
   #from tf.tv name get steamID3
   tftvurl <- paste0("http://www.teamfortress.tv/user/", value)
   xpathIDs <- '//*[@id="content-inner"]/div[1]/table[1]'
-  node <- rvest::html_node(xml2::read_html(tftvurl), xpath = xpathIDs)
+  htmlFile <- xml2::read_html(tftvurl)
+  if( grepl("Page Not Found", htmlFile) ){
+  	stop(paste0("'", value, "'", " is not a real tf.tv username"))
+  }
+  node <- rvest::html_node(htmlFile, xpath = xpathIDs)
   tftable <- rvest::html_table(node)
   sid3 <- tftable[tftable[,1] == "SteamID3", 2]
 
