@@ -38,13 +38,12 @@ queryLogstf <- function(
 
 }
 
-#'import(rvest)
 `addPlayerQs<-` <- function(qs, value){
   #from tf.tv name get steamID3
   tftvurl <- paste0("http://www.teamfortress.tv/user/", value)
   xpathIDs <- '//*[@id="content-inner"]/div[1]/table[1]'
-  node <- html_node(read_html(tftvurl), xpath = xpathIDs)
-  tftable <- html_table(node)
+  node <- rvest::html_node(xml2::read_html(tftvurl), xpath = xpathIDs)
+  tftable <- rvest::html_table(node)
   sid3 <- tftable[tftable[,1] == "SteamID3", 2]
 
   return(rbind(qs, c("", "", sid3)))
