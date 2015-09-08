@@ -1,3 +1,14 @@
+#' Grabs the raw JSON of the log and clean it up
+#'
+#' @param logId The sequential ID that logs.tf uses for a given game
+#' @param altNames A list with the alternative names and the steamID3 as a name
+#' 	Used as a dictionary
+#' @param keepClassSpec Do you want to keep the class specific stats for everyone?
+#' @param keepChat Do you want to keep the chat from the game?
+#'
+#' @return A list with the logs, the player specific stats in $player and the
+#' 	table version of the numeric stats in $table other raw stats a
+#' @export
 getLog <- function(
   logId,
   altNames = c(),

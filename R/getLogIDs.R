@@ -1,3 +1,17 @@
+#' Use logs.tf's query JSON API
+#'
+#' The log.tf query api has three queries that can be made, an uploader, a name
+#' and a player. Out of these, the player is the most reliable without prior knowledge.
+#' The result is a vector of log IDs that can be then feed into 'getLog'
+#' One of the queries are required but all three can be supplied
+#'
+#' @param title The title of the match that you want to query
+#' @param uploader The person or bot that actually put the game on log.tf
+#' @param player The SteamID3 [U:int:numbers] or the 16 digit id
+#' @param num The maximum number of IDs to output
+#'
+#' @return a vector of IDs
+#' @export
 getLogIDs <- function(title = "", uploader = "", player = "", num = 10){
   tokens <- c()
   if(nzchar(title)){
