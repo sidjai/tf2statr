@@ -4,7 +4,8 @@ queryLogstf <- function(
   season = c(),
   tournament = ""){
 
-  queries <- matrix(nrow = 1, ncol = 1)
+  queries <- matrix(nrow = 1, ncol = 3)
+  colnames(queries) <- c("title", "uploader", "player")
 
   if(length(players) > 0){
     addPlayerQs(queries) <- players
@@ -24,9 +25,9 @@ queryLogstf <- function(
   } else { queries <- queries[-1,] }
 
   ids <- getLogIDs(
-    title = queries$title,
-    uploader = queries$uploader,
-    player = queries$player,
+    title = queries[, "title"],
+    uploader = queries[, "uploader"],
+    player = queries[, "player"],
     num = 10)
 
   andIds <- notUnique(ids)
@@ -37,10 +38,16 @@ queryLogstf <- function(
 
 }
 
+#'import(rvest)
 `addPlayerQs<-` <- function(qs, value){
-  #from nickname get steam name
+  #from tf.tv name get steamID3
+  tftvurl <- paste0("http://www.teamfortress.tv/user/", value)
+  xpathIDs <- '//*[@id="content-inner"]/div[1]/table[1]'
+  node <- html_node(read_html(tftvurl), xpath = xpathIDs)
+  tftable <- html_table(node)
+  sid3 <- tftable[tftable[,1] == "SteamID3", 2]
 
-  return(qs + players)
+  return(rbind(qs, c("", "", sid3)))
 }
 
 `addSeasonQs<-` <- function(qs, value){
@@ -49,4 +56,9 @@ queryLogstf <- function(
 
 `addTourneyQs<-` <- function(qs, value){
   #parse brackets
+}
+
+notUnique <- function(vec){
+  dupSet <- duplicated(vec) | duplicated(vec, fromLast = TRUE)
+  return(unique(vec[dupSet]))
 }
