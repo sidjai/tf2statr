@@ -1,7 +1,7 @@
 context("Integration with aggregate stats")
 
 #testPlayer <- "[U:1:72806494]" #Herr_p
-#logID <- getLogIDs(player = testPlayer, num = 2)
+#logID <- getLogIDsJSON(player = testPlayer, num = 2)
 #logs <- lapply(logID, getLog)
 load("llogs.RData")
 test_that("Agg Stats does mean", {

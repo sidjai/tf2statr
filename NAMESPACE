@@ -2,4 +2,4 @@
 
 export(aggregateStats)
 export(getLog)
-export(getLogIDs)
+export(getLogIDsJSON)

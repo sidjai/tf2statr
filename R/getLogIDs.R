@@ -12,7 +12,7 @@
 #'
 #' @return a vector of IDs
 #' @export
-getLogIDs <- function(title = "", uploader = "", player = "", num = 10){
+getLogIDsJSON <- function(title = "", uploader = "", player = "", num = 10){
   tokens <- c()
   if(nzchar(title)){
     tokens <- paste0("title=", title)

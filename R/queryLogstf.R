@@ -6,6 +6,7 @@ queryLogstf <- function(
 
   queries <- matrix(nrow = 1, ncol = 3)
   colnames(queries) <- c("title", "uploader", "player")
+  ids <- c()
 
   if(length(players) > 0){
     addPlayerQs(queries) <- players
@@ -24,7 +25,7 @@ queryLogstf <- function(
     "players, the team name or the tournament to query the logs"))
   } else { queries <- queries[-1,] }
 
-  ids <- getLogIDs(
+  ids <- getLogIDsJSON(
     title = queries[, "title"],
     uploader = queries[, "uploader"],
     player = queries[, "player"],
