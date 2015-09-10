@@ -80,24 +80,23 @@ getLogIDsComptf <- function(
       "is not a valid comp.tf web page"))
   }
 
-  bracketXp <- paste0("//*[@id='mw-content-text']/div[10]/div[1]/div[1]/",
-    "div[not(contains(@style,'width:10px'))]")
+  bracketXp <- paste("//*[@id='mw-content-text']",
+    "div[contains(@class, 'bracket-wrapper')][1]/div[1]", sep = '/')
 
+  innerXp <- "div[@class = 'bracket-column' and not(contains(@style,'width:10px'))]"
+  allGamesXp <- paste(paste0("div[1]/", innerXp), innerXp, sep = " | ")
 
-  nodes <- rvest::html_nodes(page, xpath = bracketXp)
+  brNodes <- rvest::html_nodes(page, xpath = bracketXp)
+  nodes <- rvest::html_nodes(brNodes, xpath = allGamesXp)
+
   rawTitles <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
 
   spaceSet <- grepl("^\\s+", rawTitles)
   nodes <- nodes[!spaceSet]
 
-  logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/div[last()]/",
-		"div[@class='map']/a[contains(@href,'logs.tf')]")
+  ids <- parseBracketColumns(nodes)
 
-  ids <- rvest::html_attr(
-  	rvest::html_nodes(nodes, xpath = logXp),
-  	"href")
 
-  ids <- gsub("http://logs.tf/", "", ids)
 
 	if(withNames){
 		enuNames <- getMatchNames(nodes)
@@ -107,6 +106,18 @@ getLogIDsComptf <- function(
 		names(ids) <- enuNames
 	}
 
+  return(ids)
+}
+
+parseBracketColumns <- function(colNodes){
+  logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/div[last()]/",
+		"div[@class='map']/a[contains(@href,'logs.tf')]")
+
+  ids <- rvest::html_attr(
+  	rvest::html_nodes(colNodes, xpath = logXp),
+  	"href")
+
+  ids <- gsub("http://logs.tf/", "", ids)
   return(ids)
 }
 
