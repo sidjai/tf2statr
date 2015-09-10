@@ -1,8 +1,9 @@
 queryLogstf <- function(
   players = c(),
   teamName = "",
-  season = c(),
-  tournament = ""){
+  season = "",
+  tournament = "",
+  shGetLog = TRUE){
 
   queries <- matrix(nrow = 1, ncol = 3)
   colnames(queries) <- c("title", "uploader", "player")
@@ -17,25 +18,28 @@ queryLogstf <- function(
   }
 
   if(length(tournament) > 0){
-    addTourneyQs(queries) <- season
+    ids <- c(ids, getLogIDsComptf(tournament, "Tourney"))
   }
 
-  if(dim(queries)[1] == 1){
+  if(dim(queries)[1] + length(ids) == 1 ){
     stop(paste("Please supply a list of",
     "players, the team name or the tournament to query the logs"))
   } else { queries <- queries[-1,] }
 
-  ids <- getLogIDsJSON(
+  ids <- c(ids, getLogIDsJSON(
     title = queries[, "title"],
     uploader = queries[, "uploader"],
     player = queries[, "player"],
-    num = 10)
+    num = 10))
 
   andIds <- notUnique(ids)
 
-  llogs <- lapply(andIds, getLog, altNames = players)
-
-  return(llogs)
+  if(shGetLog){
+    llogs <- lapply(andIds, getLog, altNames = players)
+    return(llogs)
+  } else {
+    return(ids)
+  }
 
 }
 

@@ -53,3 +53,88 @@ parseJSONSearch <- function(searchUrl, reqNum){
 
   return(query$logs$id)
 }
+
+#' Scrap comp.tf event pages for logs IDs
+#'
+#' @param comptfToken The name of the comp.tf page in the url
+#' @param scrapeLoc Is this page a tourney (scrape a bracket) or a season
+#'   (scrape a table)
+#' @param withNames Should the identifier of each of the logs be added as a
+#'   names for output?
+#'
+#' @return A character vector with all the logs. A named character vector if
+#'   "withNames" is TRUE
+#' @export
+getLogIDsComptf <- function(
+	comptfToken,
+	scrapeLoc = c("Tourney", "Season")[1],
+	withNames = TRUE){
+  pageUrl <- paste0("http://comp.tf/wiki/", comptfToken)
+
+  page <- xml2::read_html(pageUrl)
+
+  if(any(grepl("The page you are looking for cannot be found", page))){
+    stop(paste(
+      "The provided web page:",
+      pageUrl,
+      "is not a valid comp.tf web page"))
+  }
+
+  bracketXp <- paste0("//*[@id='mw-content-text']/div[10]/div[1]/div[1]/",
+    "div[not(contains(@style,'width:10px'))]")
+
+
+  nodes <- rvest::html_nodes(page, xpath = bracketXp)
+  rawTitles <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
+
+  spaceSet <- grepl("^\\s+", rawTitles)
+  nodes <- nodes[!spaceSet]
+
+  logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/div[last()]/",
+		"div[@class='map']/a[contains(@href,'logs.tf')]")
+
+  ids <- rvest::html_attr(
+  	rvest::html_nodes(nodes, xpath = logXp),
+  	"href")
+
+  ids <- gsub("http://logs.tf/", "", ids)
+
+	if(withNames){
+		enuNames <- getMatchNames(nodes)
+		if(length(enuNames) != length(ids)){
+			stop("Naming logs in comp.tf bracket extract screwed up")
+		}
+		names(ids) <- enuNames
+	}
+
+  return(ids)
+}
+
+getMatchNames <- function(nodes){
+
+	baseLabel <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
+
+	logLabels <- mapply(function(node, nam){
+		matchNs <- rvest::html_nodes(node, xpath = "div[not(position()=1)]")
+		out <- paste0(rep(nam, length(matchNs)), " match", 1:length(matchNs))
+
+		out <- mapply(function(node, nam){
+			endXp <- paste0("div[2]/div[last()]/div[last()]/",
+				"div[@class='map']/a[contains(@href,'logs.tf')]")
+			mapNs <- rvest::html_nodes(node, xpath = endXp)
+			if(length(mapNs) > 0){
+				return(paste0(rep(nam, length(mapNs)), " map", 1:length(mapNs)))
+			} else {
+				return("")
+			}
+
+		}, matchNs, out)
+
+	},nodes, baseLabel)
+
+	logLabels <- c(logLabels, recursive = TRUE)
+	logLabels <- logLabels[nzchar(logLabels)]
+
+	return(logLabels)
+
+}
