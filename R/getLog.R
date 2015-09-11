@@ -42,10 +42,13 @@ getLog <- function(
   totHeal[plyMat[medSet, "team"]] <- plyMat[medSet, "heal"]
   percentVec <- plyMat[, "hr"] / totHeal[plyMat[, "team"]]
 
+  numStreaks <- c(table(match$killstreaks$steamid))
+  streakVec <- rep(0, dim(plyMat)[1])
+  streakVec[match(names(numStreaks), rownames(plyMat))] <- numStreaks
 
 
-  finNames <- c(colnames(plyMat), "daphr", "hr_ratio", "dmg_realpdmg")
-  plyMat <- cbind(plyMat, dmgPerVec, percentVec, cleanUpVec)
+  finNames <- c(colnames(plyMat), "daphr", "hr_ratio", "dmg_realpdmg", "num_streaks")
+  plyMat <- cbind(plyMat, dmgPerVec, percentVec, cleanUpVec, streakVec)
   colnames(plyMat) <- finNames
 
   if(length(altNames) > 0){
