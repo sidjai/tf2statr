@@ -13,88 +13,115 @@
 #' @return a vector of IDs
 #' @export
 getLogIDsJSON <- function(title = "", uploader = "", player = "", num = 10){
-  tokens <- c()
-  if(nzchar(title)){
-    tokens <- paste0("title=", title)
-  }
-  if(nzchar(uploader)){
-    tokens <- paste0("uploader=", uploader)
-  }
-  if(nzchar(player)){
-    tokens <- paste0("player=", player)
-  }
+	tokens <- c()
+	if(nzchar(title)){
+		tokens <- paste0("title=", title)
+	}
+	if(nzchar(uploader)){
+		tokens <- paste0("uploader=", uploader)
+	}
+	if(nzchar(player)){
+		tokens <- paste0("player=", player)
+	}
 
-  if(length(tokens) == 0){
-    stop("Please supply a search parameter of either a title or an uploader")
-  }
-  tokens <- c(tokens, paste0("limit=", num))
-  jsonSearch <- paste0("http://logs.tf/json_search?", paste(tokens, collapse = "&"))
-  return(parseJSONSearch(jsonSearch, num))
+	if(length(tokens) == 0){
+		stop("Please supply a search parameter of either a title or an uploader")
+	}
+	tokens <- c(tokens, paste0("limit=", num))
+	jsonSearch <- paste0("http://logs.tf/json_search?", paste(tokens, collapse = "&"))
+	return(parseJSONSearch(jsonSearch, num))
 
 
 }
 
 parseJSONSearch <- function(searchUrl, reqNum){
-  query <- jsonlite::fromJSON(searchUrl)
-  if(!query$success){
-    stop(paste(
-      "The search:",
-      searchUrl,
-      "had no hits with response:",
-      query[[1]]))
-  }
+	query <- jsonlite::fromJSON(searchUrl)
+	if(!query$success){
+		stop(paste(
+			"The search:",
+			searchUrl,
+			"had no hits with response:",
+			query[[1]]))
+	}
 
-  if(query$results == reqNum){
-    warning(sprintf(
-      "More results may be online since you requested %d matches and got %d matches",
-      reqNum,
-      query$results))
-  }
+	if(query$results == reqNum){
+		warning(sprintf(
+			"More results may be online since you requested %d matches and got %d matches",
+			reqNum,
+			query$results))
+	}
 
-  return(query$logs$id)
+	return(query$logs$id)
 }
 
 #' Scrap comp.tf event pages for logs IDs
 #'
+#' This goes to a given comp.tf website and grabs logs for the first bracket
+#' listed or the <insert season entry>. This links to the 'data/eventArchive'
+#' JSON archive so that comp.tf is not queried multiple times. However,
+#' sometimes the log IDs need to be updated in the situation with an ongoing
+#' event. If the event is in the archive it will ask the user if they want to
+#' update the entry which would do the whole process like it was a new entry.
+#' With a new entry, by default, this archive is updated with a new entry. The
+#' difference between the archive and the ids are that the JSON archive returns
+#' a list with the names of the tournament while the function returns a named
+#' character vector for ease of throwing into 'getLog' easy transfer between the
+#' two can be done with \code{as.list()} or \code{c( , recursive = TRUE)}
+#'
 #' @param comptfToken The name of the comp.tf page in the url
 #' @param scrapeLoc Is this page a tourney (scrape a bracket) or a season
-#'   (scrape a table)
+#'	 (scrape a table)
 #' @param withNames Should the identifier of each of the logs be added as a
-#'   names for output?
+#'	 names for output?
+#' @param saveArchive Should the new query be saved in the tf2statr library in
+#'	 'data'?
 #'
 #' @return A character vector with all the logs. A named character vector if
-#'   "withNames" is TRUE
+#'	 "withNames" is TRUE
 #' @export
 getLogIDsComptf <- function(
 	comptfToken,
 	scrapeLoc = c("Tourney", "Season")[1],
-	withNames = TRUE){
-  pageUrl <- paste0("http://comp.tf/wiki/", comptfToken)
+	withNames = TRUE,
+	saveArchive = TRUE){
 
-  page <- xml2::read_html(pageUrl)
+	data("eventArchive", package = "tf2statr")
 
-  if(any(grepl("The page you are looking for cannot be found", page))){
-    stop(paste(
-      "The provided web page:",
-      pageUrl,
-      "is not a valid comp.tf web page"))
-  }
+	if(grepl(comptfToken, names(events))){
+		resp <- readline(
+			"This event is already in the archive. Want to update? y or n: ")
 
-  bracketXp <- paste("//*[@id='mw-content-text']",
-    "div[contains(@class, 'bracket-wrapper')][1]/div[1]", sep = '/')
+		if(grepl("n", resp, ignore.case = TRUE)){
+			return(c(events[[comptfToken]], recursive = TRUE))
+		}
+	}
 
-  innerXp <- "div[@class = 'bracket-column' and not(contains(@style,'width:10px'))]"
-  allGamesXp <- paste(paste0("div[1]/", innerXp), innerXp, sep = " | ")
+	pageUrl <- paste0("http://comp.tf/wiki/", comptfToken)
 
-  brNodes <- rvest::html_nodes(page, xpath = bracketXp)
-  nodes <- rvest::html_nodes(brNodes, xpath = allGamesXp)
+	page <- xml2::read_html(pageUrl)
 
-  rawTitles <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
+	if(any(grepl("The page you are looking for cannot be found", page))){
+		stop(paste(
+			"The provided web page:",
+			pageUrl,
+			"is not a valid comp.tf web page"))
+	}
 
-  spaceSet <- grepl("^\\s+", rawTitles)
-  nodes <- nodes[!spaceSet]
+	bracketXp <- paste("//*[@id='mw-content-text']",
+		"div[contains(@class, 'bracket-wrapper')][1]/div[1]", sep = '/')
 
-  ids <- parseBracketColumns(nodes)
+	innerXp <- "div[@class = 'bracket-column' and not(contains(@style,'width:10px'))]"
+	allGamesXp <- paste(paste0("div[1]/", innerXp), innerXp, sep = " | ")
+
+	brNodes <- rvest::html_nodes(page, xpath = bracketXp)
+	nodes <- rvest::html_nodes(brNodes, xpath = allGamesXp)
+
+	rawTitles <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
+
+	spaceSet <- grepl("^\\s+", rawTitles)
+	nodes <- nodes[!spaceSet]
+
+	ids <- parseBracketColumns(nodes)
 
 
 
@@ -106,19 +133,25 @@ getLogIDsComptf <- function(
 		names(ids) <- enuNames
 	}
 
-  return(ids)
+	if(saveArchive){
+		events[[comptfToken]] <- as.list(ids)
+		writeLines(jsonlite::toJSON(events),
+			con = system.file("data", "eventArchive", package = "tf2statr"))
+	}
+
+	return(ids)
 }
 
 parseBracketColumns <- function(colNodes){
-  logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/div[last()]/",
+	logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/div[last()]/",
 		"div[@class='map']/a[contains(@href,'logs.tf')]")
 
-  ids <- rvest::html_attr(
-  	rvest::html_nodes(colNodes, xpath = logXp),
-  	"href")
+	ids <- rvest::html_attr(
+		rvest::html_nodes(colNodes, xpath = logXp),
+		"href")
 
-  ids <- gsub("http://logs.tf/", "", ids)
-  return(ids)
+	ids <- gsub("http://logs.tf/", "", ids)
+	return(ids)
 }
 
 getMatchNames <- function(nodes){
@@ -144,6 +177,7 @@ getMatchNames <- function(nodes){
 	},nodes, baseLabel)
 
 	logLabels <- c(logLabels, recursive = TRUE)
+	logLabels <- gsub("\\s", "_", logLabels)
 	logLabels <- logLabels[nzchar(logLabels)]
 
 	return(logLabels)

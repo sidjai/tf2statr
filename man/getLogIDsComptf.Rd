@@ -5,7 +5,7 @@
 \title{Scrap comp.tf event pages for logs IDs}
 \usage{
 getLogIDsComptf(comptfToken, scrapeLoc = c("Tourney", "Season")[1],
-  withNames = TRUE)
+  withNames = TRUE, saveArchive = TRUE)
 }
 \arguments{
 \item{comptfToken}{The name of the comp.tf page in the url}
@@ -14,13 +14,26 @@ getLogIDsComptf(comptfToken, scrapeLoc = c("Tourney", "Season")[1],
 (scrape a table)}
 
 \item{withNames}{Should the identifier of each of the logs be added as a
-  names for output?}
+names for output?}
+
+\item{saveArchive}{Should the new query be saved in the tf2statr library in
+  'data'?}
 }
 \value{
 A character vector with all the logs. A named character vector if
   "withNames" is TRUE
 }
 \description{
-Scrap comp.tf event pages for logs IDs
+This goes to a given comp.tf website and grabs logs for the first bracket
+listed or the <insert season entry>. This links to the 'data/eventArchive'
+JSON archive so that comp.tf is not queried multiple times. However,
+sometimes the log IDs need to be updated in the situation with an ongoing
+event. If the event is in the archive it will ask the user if they want to
+update the entry which would do the whole process like it was a new entry.
+With a new entry, by default, this archive is updated with a new entry. The
+difference between the archive and the ids are that the JSON archive returns
+a list with the names of the tournament while the function returns a named
+character vector for ease of throwing into 'getLog' easy transfer between the
+two can be done with \code{as.list()} or \code{c( , recursive = TRUE)}
 }
 
