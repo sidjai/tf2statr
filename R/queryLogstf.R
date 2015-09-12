@@ -10,7 +10,10 @@ queryLogstf <- function(
   ids <- c()
 
   if(length(players) > 0){
-    addPlayerQs(queries) <- players
+    playDict <- vapply(players, function(x){
+      tftvUser2SteamID(x)
+    }, "e")
+    addPlayerQs(queries) <- playDict
   }
 
   if(length(season) > 0){
@@ -35,7 +38,7 @@ queryLogstf <- function(
   andIds <- notUnique(ids)
 
   if(shGetLog){
-    llogs <- lapply(andIds, getLog, altNames = players)
+    llogs <- lapply(andIds, getLog, altNames = playDict)
     return(llogs)
   } else {
     return(ids)
@@ -44,26 +47,38 @@ queryLogstf <- function(
 }
 
 `addPlayerQs<-` <- function(qs, value){
-  #from tf.tv name get steamID3
-  tftvurl <- paste0("http://www.teamfortress.tv/user/", value)
+  return(rbind(qs, cbind("", "", value)))
+}
+
+tftvUser2SteamID <- function(tftvUserName){
+  tftvurl <- paste0("http://www.teamfortress.tv/user/", tftvUserName)
   xpathIDs <- '//*[@id="content-inner"]/div[1]/table[1]'
-  htmlFile <- xml2::read_html(tftvurl)
-  if( grepl("Page Not Found", htmlFile) ){
-  	stop(paste0("'", value, "'", " is not a real tf.tv username"))
-  }
-  node <- rvest::html_node(htmlFile, xpath = xpathIDs)
+
+  node <- easyScrape(tftvurl, xpathIDs, "Page Not Found")
   tftable <- rvest::html_table(node)
   sid3 <- tftable[tftable[,1] == "SteamID3", 2]
 
-  return(rbind(qs, c("", "", sid3)))
+  names(sid3) <- tftvUserName
+  return(sid3)
+}
+
+convSID2name <- function(iden){
+  query <- paste0("http://steamcommunity.com/profiles/", iden)
+  realProfile <- twitteR::decode_short_url(query)
+  return(gsub("http://steamcommunity.com/id/", "", realProfile))
+}
+
+easyScrape <- function(url, xpathCap, failRegex){
+  htmlFile <- xml2::read_html(url)
+  if( grepl(failRegex, htmlFile) ){
+  	stop(paste0("'", value, "'", " is not a real web page/search (404)"))
+  }
+  node <- rvest::html_node(htmlFile, xpath = xpathCap)
+  return(node)
 }
 
 `addSeasonQs<-` <- function(qs, value){
   #Go through league uploads
-}
-
-`addTourneyQs<-` <- function(qs, value){
-  #parse brackets
 }
 
 notUnique <- function(vec){

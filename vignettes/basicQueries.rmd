@@ -1,0 +1,35 @@
+---
+title: "Basic usage of tf2statr"
+author: "Siddarta Jairam"
+date: "`r strftime(Sys.time(),'%A, %B %d, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Overall design}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+This package tries to contect much of the TF2 ecosystem to explore basic statistics and open it up to statistical models available in R. The main driving force behind this project is actually the abundance of stats available due to automatically generated logs of each match. However, the
+querying this information is easiest to do right after a match or on a case by case basis. For insight on a whole period of time, over certain play styles, or with a certain level of competition, the process is tedious and prone to error.
+
+The package is structured around the main function of grabbing the actual logs from logs.tf. This uses the JSON API provided by logs.tf so all the raw values that are recorded can be examined as shown below.
+
+```{r}
+map1UBFi55 <- "999065"
+log <- getLog(map1UBFi55)
+
+names(log)]
+colnames(log$table)
+log$table[,c("kill", "dmg")]
+```
+
+Most of what you want to see in a log is compiled in the matrix 'log$table'. Most of the columns are straight from the raw logs except for the dmg per amount of heals (daphr), percent of total heals recieved (hr_ratio), the ratio of the damage received by the opponent versus the dmg inflicted (dmg_realpdmg) and the number of kill streaks above 2 kills (num_streaks). The complicated variables "number of donks" are still found in the 'log$player$[player_name]'. Medic stats are still in 'medicstats' though some of them has been integrated into the table.
+
+This seems dandy except for the row names being the steamID3. Its not very intuitive and I'm pretty sure no one remembers their steam IDs. One solution is to used the usernames used in the match that are still kept in "log$name". This changes after games at the whim of the player so it would be hard to do a consistent analysis across a long period of time like a season. Players often have all sorts of extra characters, spaces or tags that could easily make R very unhappy. The current solution is to use a service that covers European and the American scenes that a large percentage of the competitive community uses, teamfortress.tv. On the user pages a tf.tv has a nice listing of all sorts of identifiers. This requires knowing a player's username on tf.tv but usually these are simple, ubiquitous and relatively constant. This will be done as below on a case by case basis. Afterwards, a dictionary of oft used players could be kept and loaded to be used with 'getLogs'.
+
+```{r}
+userNames <- c()
+tftvUser2SteamID
+
+
+```
