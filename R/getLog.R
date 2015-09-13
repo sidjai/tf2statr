@@ -1,17 +1,19 @@
 #' Grabs the raw JSON of the log and clean it up
 #'
 #' @param logId The sequential ID that logs.tf uses for a given game
-#' @param altNames A list with the alternative names and the steamID3 as a name
-#' 	Used as a dictionary
-#' @param keepClassSpec Do you want to keep the class specific stats for everyone?
+#' @param useAltNames should the program use the alternative names from the
+#'   player dictionary in 'data/playerDict.csv' or go find the alt name using
+#'   their steamID and their custom profile name?
+#' @param keepClassSpec Do you want to keep the class specific stats for
+#'   everyone?
 #' @param keepChat Do you want to keep the chat from the game?
 #'
 #' @return A list with the logs, the player specific stats in $player and the
-#' 	table version of the numeric stats in $table other raw stats a
+#'   table version of the numeric stats in $table other raw stats a
 #' @export
 getLog <- function(
 	logId,
-	altNames = c(),
+	useAltNames = FALSE,
 	keepClassSpec = FALSE,
 	keepChat = FALSE){
 
@@ -51,17 +53,8 @@ getLog <- function(
 	plyMat <- cbind(plyMat, dmgPerVec, percentVec, cleanUpVec, streakVec)
 	colnames(plyMat) <- finNames
 
-	if(length(altNames) > 0){
-		altNums <- match(names(altNames), rownames(plyMat))
-		if(any(is.na(altNums))){
-			stop(paste("These names did not have matches in this log:",
-			altNames[is.na(altNums)],
-			"Check the steam ID", sep = "/n"))
-		}
-
-		newNames <- rownames(plyMat)
-		newNames[altNums] <- altNames
-		rownames(plyMat) <- newNames
+	if(useAltNames){
+		rownames(plyMat) <- convSID2name(rownames(plyMat))
 	}
 
 	niceMatch$table <- plyMat

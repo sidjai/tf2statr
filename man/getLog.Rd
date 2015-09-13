@@ -4,21 +4,24 @@
 \alias{getLog}
 \title{Grabs the raw JSON of the log and clean it up}
 \usage{
-getLog(logId, altNames = c(), keepClassSpec = FALSE, keepChat = FALSE)
+getLog(logId, useAltNames = FALSE, keepClassSpec = FALSE,
+  keepChat = FALSE)
 }
 \arguments{
 \item{logId}{The sequential ID that logs.tf uses for a given game}
 
-\item{altNames}{A list with the alternative names and the steamID3 as a name
-Used as a dictionary}
+\item{useAltNames}{should the program use the alternative names from the
+player dictionary in 'data/playerDict.csv' or go find the alt name using
+their steamID and their custom profile name?}
 
-\item{keepClassSpec}{Do you want to keep the class specific stats for everyone?}
+\item{keepClassSpec}{Do you want to keep the class specific stats for
+everyone?}
 
 \item{keepChat}{Do you want to keep the chat from the game?}
 }
 \value{
 A list with the logs, the player specific stats in $player and the
-	table version of the numeric stats in $table other raw stats a
+  table version of the numeric stats in $table other raw stats a
 }
 \description{
 Grabs the raw JSON of the log and clean it up

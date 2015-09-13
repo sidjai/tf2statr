@@ -1,3 +1,22 @@
+#'Do complicated queries of TF2stats
+#'
+#'Builds a list of logs that are relevant for a query using the union of all the
+#'log IDs for the individual queries. The queries that can be done right now are
+#'player queries using log.tf Search tool as well as season and tournament using
+#'comp.tf historical pages. The players can be inputed as a list of Steam ID3s
+#'or custom profile names which are then converted into steam ID3s. Whenever
+#'possible, the program uses the archive to find log IDs for events.
+#'@param players A vector of players either given as Steam ID3s or custom
+#'  profile names
+#'@param teamName TODO
+#'@param season The string of the comp.tf webpage end piece (Insomnia52)
+#'@param tournament The string of the comp.tf webpage end piece (Insomnia52)
+#'@param shGetLog Should the program go ahead and get the logs of the query or
+#'  just output the log IDs.
+#'
+#'@return Either a vector of log IDs if shGetLog is false, or a list of the
+#'  relevant logs
+#'@export
 queryLogstf <- function(
 	players = c(),
 	teamName = "",
@@ -10,10 +29,7 @@ queryLogstf <- function(
 	ids <- c()
 
 	if(length(players) > 0){
-		playDict <- vapply(players, function(x){
-			tftvUser2SteamID(x)
-		}, "e")
-		addPlayerQs(queries) <- playDict
+		addPlayerQs(queries) <- players
 	}
 
 	if(length(season) > 0){
@@ -47,7 +63,8 @@ queryLogstf <- function(
 }
 
 `addPlayerQs<-` <- function(qs, value){
-	return(rbind(qs, cbind("", "", value)))
+	sid <- getArchiveSIDfromName(value)
+	return(rbind(qs, cbind("", "", sid)))
 }
 
 tftvUser2SteamID <- function(tftvUserName){
@@ -74,7 +91,14 @@ convSID2name <- function(sid, saveArchive = TRUE){
 	convName[useDictSet] <- playerDict[idenNum[useDictSet], 1]
 
 	queries <- paste0("http://steamcommunity.com/profiles/", sid[!useDictSet])
-	realProfiles <- twitteR::decode_short_url(queries)
+	realProfiles <- vapply(queries, function(x){
+		twitteR::decode_short_url(x)
+	}, "", USE.NAMES = FALSE)
+
+	noCustomSet <- !grepl("id", realProfiles)
+	realProfiles[noCustomSet] <- sid[noCustomSet]
+	useDictSet[noCustomSet] <- TRUE
+
 	realProfiles <- gsub("http://steamcommunity.com/id/", "", realProfiles)
 	convName[!useDictSet] <- gsub("[/]", "", realProfiles)
 

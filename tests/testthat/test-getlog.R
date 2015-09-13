@@ -17,14 +17,14 @@ test_that("Parses log correctly", {
 })
 
 test_that("Alt names are done right", {
-  alt <- list(`[U:1:72806494]` = "Herr_p")
-  lgwnames <- getLog(testLogId, altNames = alt)
+
+  lgwnames <- getLog(testLogId, useAltNames = TRUE)
 
   nam <- rownames(lgwnames$table)
-  ind <- match("Herr_p", nam)
+  ind <- match("The7alfa", nam)
   expect_false(is.na(ind))
 
-  befInd <- match("[U:1:72806494]", rownames(lgtf$table))
+  befInd <- match("[U:1:38625038]", rownames(lgtf$table))
   expect_equal(befInd, ind)
 
 })
