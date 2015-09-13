@@ -13,3 +13,9 @@ test_that("notUnique actually does && right", {
 	expect_equal(niceVec, c(1, 5, 9))
 	expect_false(as.logical(anyDuplicated(niceVec)))
 })
+
+test_that("notUnique falls through with a unique set", {
+	vec <- 1:10
+	niceVec <- notUnique(vec)
+	expect_equal(niceVec, vec)
+})

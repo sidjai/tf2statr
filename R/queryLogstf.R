@@ -32,29 +32,34 @@ queryLogstf <- function(
 		addPlayerQs(queries) <- players
 	}
 
-	if(length(season) > 0){
+	if(nzchar(season)){
 		addSeasonQs(queries) <- season
 	}
 
-	if(length(tournament) > 0){
+	if(nzchar(tournament)){
 		ids <- c(ids, getLogIDsComptf(tournament, "Tourney"))
 	}
 
 	if(dim(queries)[1] + length(ids) == 1 ){
 		stop(paste("Please supply a list of",
 		"players, the team name or the tournament to query the logs"))
-	} else { queries <- queries[-1,] }
+	} else if(dim(queries)[1] > 1){
+		queries <- queries[-1,]
+		ids <- c(ids, getLogIDsJSON(
+			title = queries[, "title"],
+			uploader = queries[, "uploader"],
+			player = queries[, "player"],
+			num = 10))
+	}
 
-	ids <- c(ids, getLogIDsJSON(
-		title = queries[, "title"],
-		uploader = queries[, "uploader"],
-		player = queries[, "player"],
-		num = 10))
+
 
 	andIds <- notUnique(ids)
 
 	if(shGetLog){
-		llogs <- lapply(andIds, getLog, altNames = playDict)
+		llogs <- lapply(andIds, function(x){
+			getLog(x, useAltNames = TRUE)
+		})
 		return(llogs)
 	} else {
 		return(ids)
@@ -96,14 +101,17 @@ convSID2name <- function(sid, saveArchive = TRUE){
 	}, "", USE.NAMES = FALSE)
 
 	noCustomSet <- !grepl("id", realProfiles)
-	realProfiles[noCustomSet] <- sid[noCustomSet]
-	useDictSet[noCustomSet] <- TRUE
+	realProfiles[noCustomSet] <- sid[!useDictSet][noCustomSet]
 
 	realProfiles <- gsub("http://steamcommunity.com/id/", "", realProfiles)
 	convName[!useDictSet] <- gsub("[/]", "", realProfiles)
 
-	if(saveArchive && !all(useDictSet)){
-		addMat <- cbind(convName, sid)[!useDictSet, , drop = FALSE]
+	saveSet <- !useDictSet
+	saveSet[!useDictSet][noCustomSet] <- FALSE
+
+	if(saveArchive && any(saveSet)){
+
+		addMat <- cbind(convName, sid)[saveSet, , drop = FALSE]
 		write.table(
 			addMat,
 			file = system.file("data", "playerDict.csv", package = "tf2statr"),
@@ -154,5 +162,9 @@ easyScrape <- function(url, xpathCap, failRegex){
 
 notUnique <- function(vec){
 	dupSet <- duplicated(vec) | duplicated(vec, fromLast = TRUE)
-	return(unique(vec[dupSet]))
+	if(any(dupSet)){
+		return(unique(vec[dupSet]))
+	} else {
+		return(vec)
+	}
 }
