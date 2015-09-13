@@ -1,5 +1,5 @@
 context("Archiving")
 
-test_that("Name grabing works", {
-	convSID2name("")
+test_that("Get name archives", {
+	expect_true(grepl("[U:1:2431135]", getArchiveSIDfromName("ryb")))
 })

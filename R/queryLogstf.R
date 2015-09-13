@@ -91,6 +91,30 @@ convSID2name <- function(sid, saveArchive = TRUE){
 
 }
 
+getArchiveSIDfromName <- function(iden){
+
+	data("playerDict", package = "tf2statr")
+	playerDict <- as.matrix(playerDict)
+
+	convSids <- rep(NA, length(iden))
+
+	dictNums <- match(iden, playerDict[, 1])
+	convSids[dictNums] <- playerDict[dictNums, 2]
+
+
+	badSet <- is.na(convSids)
+	if(any(badSet)){
+		warning(paste("These players are not in the archive dictionary:",
+			paste(iden[badSet], sep = ','),
+			"Update the archive by doing it manually, or using a log that they played in",
+			sep = "\n"))
+	}
+
+
+	return(convSids)
+}
+
+
 easyScrape <- function(url, xpathCap, failRegex){
 	htmlFile <- xml2::read_html(url)
 	if( grepl(failRegex, htmlFile) ){
