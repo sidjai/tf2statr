@@ -62,12 +62,33 @@ tftvUser2SteamID <- function(tftvUserName){
 	return(sid3)
 }
 
-convSID2name <- function(iden){
-	query <- paste0("http://steamcommunity.com/profiles/", iden)
-	realProfile <- twitteR::decode_short_url(query)
-	realProfile <- gsub("http://steamcommunity.com/id/", "", realProfile)
+convSID2name <- function(sid, saveArchive = TRUE){
 
-	return(substr(realProfile, 1, nchar(realProfile) - 1))
+	data("playerDict", package = "tf2statr")
+	playerDict <- as.matrix(playerDict)
+
+	idenNum <- match(sid, playerDict[, 2])
+	convName <- rep("", length(sid))
+
+	useDictSet <- !is.na(idenNum)
+	convName[useDictSet] <- playerDict[idenNum[useDictSet], 1]
+
+	queries <- paste0("http://steamcommunity.com/profiles/", sid[!useDictSet])
+	realProfiles <- twitteR::decode_short_url(queries)
+	realProfiles <- gsub("http://steamcommunity.com/id/", "", realProfiles)
+	convName[!useDictSet] <- gsub("[/]", "", realProfiles)
+
+	if(saveArchive && !all(useDictSet)){
+		addMat <- cbind(convName, sid)[!useDictSet, , drop = FALSE]
+		write.table(
+			addMat,
+			file = system.file("data", "playerDict.csv", package = "tf2statr"),
+			append = TRUE, row.names = FALSE, col.names = FALSE, sep = ";")
+
+	}
+
+	return(convName)
+
 }
 
 easyScrape <- function(url, xpathCap, failRegex){
