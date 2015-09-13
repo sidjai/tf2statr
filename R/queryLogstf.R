@@ -65,7 +65,9 @@ tftvUser2SteamID <- function(tftvUserName){
 convSID2name <- function(iden){
 	query <- paste0("http://steamcommunity.com/profiles/", iden)
 	realProfile <- twitteR::decode_short_url(query)
-	return(gsub("http://steamcommunity.com/id/", "", realProfile))
+	realProfile <- gsub("http://steamcommunity.com/id/", "", realProfile)
+
+	return(substr(realProfile, 1, nchar(realProfile) - 1))
 }
 
 easyScrape <- function(url, xpathCap, failRegex){
