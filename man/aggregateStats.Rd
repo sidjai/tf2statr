@@ -10,13 +10,13 @@ aggregateStats(lmatch, statFun = mean)
 \item{lmatch}{a list of logs produced by \code{\link{getLog}}}
 
 \item{statFun}{The statistical function that you want to use on the logs.
-  Default is a simple mean, but can include any function, R or user made,
-  with a \code{na.rm} parameter}
+     Default is a simple mean, but can include any function, R or user made,
+     with a \code{na.rm} parameter}
 }
 \value{
 A matrix of the model appliled log table for all the participants
-  involved in any of the games. There is an extra column of \code{gp}, or
-  games played.
+	 involved in any of the games. There is an extra column of \code{gp}, or
+	 games played.
 }
 \description{
 Do statistics on multiple logs

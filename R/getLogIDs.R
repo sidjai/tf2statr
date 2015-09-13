@@ -54,44 +54,50 @@ parseJSONSearch <- function(searchUrl, reqNum){
 	return(query$logs$id)
 }
 
-#' Scrap comp.tf event pages for logs IDs
+#'Scrap comp.tf event pages for logs IDs
 #'
-#' This goes to a given comp.tf website and grabs logs for the first bracket
-#' listed or the <insert season entry>. This links to the 'data/eventArchive'
-#' JSON archive so that comp.tf is not queried multiple times. However,
-#' sometimes the log IDs need to be updated in the situation with an ongoing
-#' event. If the event is in the archive it will ask the user if they want to
-#' update the entry which would do the whole process like it was a new entry.
-#' With a new entry, by default, this archive is updated with a new entry. The
-#' difference between the archive and the ids are that the JSON archive returns
-#' a list with the names of the tournament while the function returns a named
-#' character vector for ease of throwing into 'getLog' easy transfer between the
-#' two can be done with \code{as.list()} or \code{c( , recursive = TRUE)}
+#'This goes to a given comp.tf website and grabs logs for the first bracket
+#'listed or the <insert season entry>. This links to the 'data/eventArchive'
+#'JSON archive so that comp.tf is not queried multiple times. However, sometimes
+#'the log IDs need to be updated in the situation with an ongoing event. If the
+#'event is in the archive it will ask the user if they want to update the entry
+#'which would do the whole process like it was a new entry. With a new entry, by
+#'default, this archive is updated with a new entry. The difference between the
+#'archive and the ids are that the JSON archive returns a list with the names of
+#'the tournament while the function returns a named character vector for ease of
+#'throwing into 'getLog' easy transfer between the two can be done with
+#'\code{as.list()} or \code{c( , recursive = TRUE)}
 #'
-#' @param comptfToken The name of the comp.tf page in the url
-#' @param scrapeLoc Is this page a tourney (scrape a bracket) or a season
-#'	 (scrape a table)
-#' @param withNames Should the identifier of each of the logs be added as a
-#'	 names for output?
-#' @param saveArchive Should the new query be saved in the tf2statr library in
-#'	 'data'?
+#'@param comptfToken The name of the comp.tf page in the url
+#'@param scrapeLoc Is this page a tourney (scrape a bracket) or a season (scrape
+#'  a table)
+#'@param withNames Should the identifier of each of the logs be added as a names
+#'  for output?
+#'@param saveArchive Should the new query be saved in the tf2statr library in
+#'  'data'?
+#'@param shReDownload If the event is in the the archive, should it redownload
+#'  the file?
 #'
-#' @return A character vector with all the logs. A named character vector if
-#'	 "withNames" is TRUE
-#' @export
+#'@return A character vector with all the logs. A named character vector if
+#'  "withNames" is TRUE
+#'@export
 getLogIDsComptf <- function(
 	comptfToken,
 	scrapeLoc = c("Tourney", "Season")[1],
 	withNames = TRUE,
-	saveArchive = TRUE){
+	saveArchive = TRUE,
+	shReDownload = NULL){
 
 	data("eventArchive", package = "tf2statr")
 
 	if(grepl(comptfToken, names(events))){
-		resp <- readline(
-			"This event is already in the archive. Want to update? y or n: ")
+		if(is.null(shReDownload)){
+			resp <- readline(
+				"This event is already in the archive. Want to update? y or n: ")
+			shReDownload <- grepl("y", resp, ignore.case = TRUE)
+		}
 
-		if(grepl("n", resp, ignore.case = TRUE)){
+		if(!shReDownload){
 			return(c(events[[comptfToken]], recursive = TRUE))
 		}
 	}

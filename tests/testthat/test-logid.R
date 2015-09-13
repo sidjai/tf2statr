@@ -11,14 +11,14 @@ test_that("Gets right Ids given a Player", {
 })
 
 test_that("comp.tf scraping gets Tourney IDs right",{
-	logIDs <- getLogIDsComptf("Insomnia52", withNames = FALSE)
+	logIDs <- getLogIDsComptf("Insomnia52", withNames = FALSE, shReDownload = TRUE)
 
 	expect_equal(length(logIDs), 52)
 	expect_true(is.character(logIDs))
 })
 
 test_that("comp.tf scraping gets Tourney IDs right",{
-	logIDs <- getLogIDsComptf("Insomnia52", withNames = TRUE)
+	logIDs <- getLogIDsComptf("Insomnia52", withNames = TRUE, shReDownload = TRUE)
 
 	expect_equal(length(logIDs), 52)
 	expect_true(is.character(logIDs))

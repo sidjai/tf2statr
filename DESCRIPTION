@@ -14,5 +14,6 @@ License: GPL (>= 2)
 Imports:
   jsonlite,
   xml2,
-  rvest
+  rvest,
+  twitteR
 Suggests: testthat
