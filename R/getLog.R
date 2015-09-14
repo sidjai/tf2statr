@@ -136,7 +136,10 @@ aggregateStats <- function(lmatch, statFun = mean){
 		aggInds <- match(rownames(log$table), allPlayerNames)
 		agg[aggInds, , gpcnt[aggInds]] <- log$table
 
-		gpcnt[aggInds] <- gpcnt[aggInds] + 1
+		if(!all(is.na(log$table))){
+			gpcnt[aggInds] <- gpcnt[aggInds] + 1
+		}
+
 	}
 
 	agg <- apply(X = agg, MARGIN = c(1, 2), FUN = statFun, na.rm = TRUE)
