@@ -28,3 +28,11 @@ test_that("Alt names are done right", {
   expect_equal(befInd, ind)
 
 })
+
+test_that("Corrupted games are recognized", {
+  badID <- "1000714"
+
+  badLog <- getLog(badID)
+
+  expect_true(all(is.na(badLog$table)))
+})

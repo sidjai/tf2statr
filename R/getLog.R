@@ -2,14 +2,14 @@
 #'
 #' @param logId The sequential ID that logs.tf uses for a given game
 #' @param useAltNames should the program use the alternative names from the
-#'   player dictionary in 'data/playerDict.csv' or go find the alt name using
-#'   their steamID and their custom profile name?
+#'	 player dictionary in 'data/playerDict.csv' or go find the alt name using
+#'	 their steamID and their custom profile name?
 #' @param keepClassSpec Do you want to keep the class specific stats for
-#'   everyone?
+#'	 everyone?
 #' @param keepChat Do you want to keep the chat from the game?
 #'
 #' @return A list with the logs, the player specific stats in $player and the
-#'   table version of the numeric stats in $table other raw stats a
+#'	 table version of the numeric stats in $table with some added stats
 #' @export
 getLog <- function(
 	logId,
@@ -34,22 +34,29 @@ getLog <- function(
 		cleanLogMat(x, teamNames = names(match$teams))
 	},rep(1.1, 27)))
 
+	if(!verifyLog(niceMatch)){
+		plyMat[,] <- NA
+		dmgPerVec <- rep(NA, dim(plyMat)[1])
+		percentVec <-	cleanUpVec <- streakVec <- dmgPerVec
 
-	cleanUpVec <- plyMat[, "dmg_real"] / plyMat[, "dmg"]
-	dmgPerVec <- plyMat[, "dmg"] / plyMat[, "hr"]
-	dmgPerVec[is.infinite(dmgPerVec)] <- NA #Medics don't get heals
+	} else {
+		cleanUpVec <- plyMat[, "dmg_real"] / plyMat[, "dmg"]
+		dmgPerVec <- plyMat[, "dmg"] / plyMat[, "hr"]
+		dmgPerVec[is.infinite(dmgPerVec)] <- NA #Medics don't get heals
 
-	totHeal <- rep(0,2)
-	medSet <- names(match$healspread)
-	totHeal[plyMat[medSet, "team"]] <- plyMat[medSet, "heal"]
-	percentVec <- plyMat[, "hr"] / totHeal[plyMat[, "team"]]
+		totHeal <- rep(0,2)
+		medSet <- names(match$healspread)
+		totHeal[plyMat[medSet, "team"]] <- plyMat[medSet, "heal"]
+		percentVec <- plyMat[, "hr"] / totHeal[plyMat[, "team"]]
 
-	numStreaks <- c(table(match$killstreaks$steamid))
-	streakVec <- rep(0, dim(plyMat)[1])
-	streakVec[match(names(numStreaks), rownames(plyMat))] <- numStreaks
+		numStreaks <- c(table(match$killstreaks$steamid))
+		streakVec <- rep(0, dim(plyMat)[1])
+		streakVec[match(names(numStreaks), rownames(plyMat))] <- numStreaks
 
+	}
 
-	finNames <- c(colnames(plyMat), "daphr", "hr_ratio", "dmg_realpdmg", "num_streaks")
+	finNames <- c(colnames(plyMat),
+		"daphr", "hr_ratio", "dmg_realpdmg", "num_streaks")
 	plyMat <- cbind(plyMat, dmgPerVec, percentVec, cleanUpVec, streakVec)
 	colnames(plyMat) <- finNames
 
@@ -70,10 +77,23 @@ getLog <- function(
 
 cleanLogMat <- function(lplayer, teamNames){
 	lplayer$team <- match(lplayer$team, teamNames)
-	simpleSet <- vapply(lplayer, function(x){ !is.list(x) && !is.data.frame(x) }, TRUE)
+	simpleSet <- vapply(lplayer, function(x){
+		!is.list(x) && !is.data.frame(x)
+	}, TRUE)
 	cropped <- as.numeric(lplayer[simpleSet])
 	names(cropped) <- names(lplayer[simpleSet])
 	return(cropped)
+}
+
+# Check if log is incomplete / corrupted
+verifyLog <- function(log){
+
+	numFromMed <- length(c(log$healspread, recursive = TRUE))
+		+ length(log$healspread)
+	numFromPly <- length(log$players)
+	goodMedStat <- (numFromPly == numFromMed)
+
+	return(goodMedStat)
 }
 
 #' Do statistics on multiple logs

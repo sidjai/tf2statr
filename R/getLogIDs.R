@@ -90,7 +90,7 @@ getLogIDsComptf <- function(
 
 	data("eventArchive", package = "tf2statr")
 
-	if(grepl(comptfToken, names(events))){
+	if(any(grepl(comptfToken, names(events)))){
 		if(is.null(shReDownload)){
 			resp <- readline(
 				"This event is already in the archive. Want to update? y or n: ")

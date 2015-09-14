@@ -21,7 +21,7 @@ everyone?}
 }
 \value{
 A list with the logs, the player specific stats in $player and the
-  table version of the numeric stats in $table other raw stats a
+	 table version of the numeric stats in $table with some added stats
 }
 \description{
 Grabs the raw JSON of the log and clean it up
