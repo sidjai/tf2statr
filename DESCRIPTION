@@ -17,3 +17,4 @@ Imports:
   rvest(>= 0.3.0),
   twitteR
 Suggests: testthat
+LazyData: true
