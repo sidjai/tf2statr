@@ -17,12 +17,12 @@ test_that("playerDict archive is healthy", {
 test_that("eventArchive data set is healthy", {
 	data("eventArchive")
 
-	expect_true(is.list(events))
+	expect_true(is.list(eventArchive))
 
-	eleList <- vapply(events, is.list, TRUE)
+	eleList <- vapply(eventArchive, is.list, TRUE)
 	expect_true(all(eleList))
 
-	eleNames <- vapply(events, function(x){
+	eleNames <- vapply(eventArchive, function(x){
 		!is.null(names(x)) && all(nzchar(x))
 	}, TRUE)
 	expect_true(all(eleNames))

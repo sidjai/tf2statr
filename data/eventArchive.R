@@ -1,2 +1,2 @@
-events <- jsonlite::fromJSON(
+eventArchive <- jsonlite::fromJSON(
   system.file("data", "eventArchive", package = "tf2statr"))

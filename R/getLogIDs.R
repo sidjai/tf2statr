@@ -88,9 +88,9 @@ getLogIDsComptf <- function(
 	saveArchive = TRUE,
 	shReDownload = NULL){
 
-	data("eventArchive", package = "tf2statr")
+	data("eventArchive", package = "tf2statr", envir = environment())
 
-	if(any(grepl(comptfToken, names(events)))){
+	if(any(grepl(comptfToken, names(eventArchive)))){
 		if(is.null(shReDownload)){
 			resp <- readline(
 				"This event is already in the archive. Want to update? y or n: ")
@@ -98,7 +98,7 @@ getLogIDsComptf <- function(
 		}
 
 		if(!shReDownload){
-			return(c(events[[comptfToken]], recursive = TRUE))
+			return(c(eventArchive[[comptfToken]], recursive = TRUE))
 		}
 	}
 
@@ -140,8 +140,8 @@ getLogIDsComptf <- function(
 	}
 
 	if(saveArchive){
-		events[[comptfToken]] <- as.list(ids)
-		writeLines(jsonlite::toJSON(events),
+		eventArchive[[comptfToken]] <- as.list(ids)
+		writeLines(jsonlite::toJSON(eventArchive),
 			con = system.file("data", "eventArchive", package = "tf2statr"))
 	}
 

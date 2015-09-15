@@ -14,8 +14,11 @@ NULL
 #' constant so results can be compared across games and timeperiods.
 #'
 #' @format A data frame, "playerDict" with 2 columns and an ever expanding
-#'   number of rows: \describe{ \item{name}{default is the custom profile vanity
-#'   name as a string} \item{carat}{The Steam ID3 of the player in the form of
+#'   number of rows:
+#' \describe{
+#'   \item{name}{default is the custom profile vanity
+#'   name as a string}
+#'   \item{steamID3}{The Steam ID3 of the player in the form of
 #'   [u:int:numbers] as a character} }
 #' @source the redirect from the Steam ID3 from Valve. The function that creates
 #'   more rows using this method is \code{convSID2name}
@@ -30,13 +33,14 @@ NULL
 #' while the '.R' code translates it into a list of lists using 'jsonlite'
 #' package.
 #'
-#' @format A list of the different events in variable "events" \describe{
+#' @format A list of the different events in variable "events"
+#' \describe{
 #'   \item{nameOfFirstLevel}{The comp.tf webpage name last portion}
 #'   \item{nameOfSecondLevel}{The different games in the event with designations
 #'   in the naming scheme. For tournaments, it is sequenced as the following:the
 #'   name of the round as given by comp.tf, the match number from the top of the
-#'   bracket and then the map number in that match.} \item{secondLevel}{The log
-#'   ID is a string of the log.tf log ID} }
+#'   bracket and then the map number in that match.}
+#'   \item{secondLevel}{The log ID is a string of the log.tf log ID} }
 #' @source \url{http://comp.tf/wiki/Main_Page} with the function that scrapes it
 #'   and saves new entires the archive \code{\link{getLogIDsComptf}}
 #' @name eventArchive

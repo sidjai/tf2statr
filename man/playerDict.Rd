@@ -5,8 +5,11 @@
 \alias{playerDict}
 \title{Archive of player names and their corresponding Steam ID3}
 \format{A data frame, "playerDict" with 2 columns and an ever expanding
-  number of rows: \describe{ \item{name}{default is the custom profile vanity
-  name as a string} \item{carat}{The Steam ID3 of the player in the form of
+  number of rows:
+\describe{
+  \item{name}{default is the custom profile vanity
+  name as a string}
+  \item{steamID3}{The Steam ID3 of the player in the form of
   [u:int:numbers] as a character} }}
 \source{
 the redirect from the Steam ID3 from Valve. The function that creates

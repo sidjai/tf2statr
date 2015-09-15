@@ -86,7 +86,7 @@ tftvUser2SteamID <- function(tftvUserName){
 
 convSID2name <- function(sid, saveArchive = TRUE){
 
-	data("playerDict", package = "tf2statr")
+	data("playerDict", package = "tf2statr", envir = environment())
 	playerDict <- as.matrix(playerDict)
 
 	idenNum <- match(sid, playerDict[, 2])
@@ -125,7 +125,7 @@ convSID2name <- function(sid, saveArchive = TRUE){
 
 getArchiveSIDfromName <- function(iden){
 
-	data("playerDict", package = "tf2statr")
+	data("playerDict", package = "tf2statr", envir = environment())
 	playerDict <- as.matrix(playerDict)
 
 	convSids <- rep(NA, length(iden))
@@ -150,7 +150,7 @@ getArchiveSIDfromName <- function(iden){
 easyScrape <- function(url, xpathCap, failRegex){
 	htmlFile <- xml2::read_html(url)
 	if( grepl(failRegex, htmlFile) ){
-		stop(paste0("'", value, "'", " is not a real web page/search (404)"))
+		stop(paste0("'", url, "'", " is not a real web page/search (404)"))
 	}
 	node <- rvest::html_node(htmlFile, xpath = xpathCap)
 	return(node)

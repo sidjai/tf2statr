@@ -4,13 +4,14 @@
 \name{eventArchive}
 \alias{eventArchive}
 \title{Archive of tf2 events and their corresponding log ID}
-\format{A list of the different events in variable "events" \describe{
+\format{A list of the different events in variable "events"
+\describe{
   \item{nameOfFirstLevel}{The comp.tf webpage name last portion}
   \item{nameOfSecondLevel}{The different games in the event with designations
   in the naming scheme. For tournaments, it is sequenced as the following:the
   name of the round as given by comp.tf, the match number from the top of the
-  bracket and then the map number in that match.} \item{secondLevel}{The log
-  ID is a string of the log.tf log ID} }}
+  bracket and then the map number in that match.}
+  \item{secondLevel}{The log ID is a string of the log.tf log ID} }}
 \source{
 \url{http://comp.tf/wiki/Main_Page} with the function that scrapes it
   and saves new entires the archive \code{\link{getLogIDsComptf}}
