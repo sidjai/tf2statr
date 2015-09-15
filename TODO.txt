@@ -1,7 +1,9 @@
 #Short term
 
+- add steam developer instead of twitteR decode redirect
+--have to add a key thing first
+
 - Tournament / season support
--- i series
 -- esea NA 6s
 -- eft2l EU 6s
 -- UGC NA Highlander
