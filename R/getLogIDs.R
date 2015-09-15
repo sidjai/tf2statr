@@ -113,28 +113,47 @@ getLogIDsComptf <- function(
 			"is not a valid comp.tf web page"))
 	}
 
-	bracketXp <- paste("//*[@id='mw-content-text']",
-		"div[contains(@class, 'bracket-wrapper')][1]/div[1]", sep = '/')
+	if(scrapeLoc == "Tourney"){
 
-	innerXp <- "div[@class = 'bracket-column' and not(contains(@style,'width:10px'))]"
-	allGamesXp <- paste(paste0("div[1]/", innerXp), innerXp, sep = " | ")
+		bracketXp <- paste("//*[@id='mw-content-text']",
+			"div[contains(@class, 'bracket-wrapper')][1]/div[1]", sep = '/')
+
+		innerXp <- "div[@class = 'bracket-column' and not(contains(@style,'width:10px'))]"
+		allGamesXp <- paste(paste0("div[1]/", innerXp), innerXp, sep = " | ")
+
+		logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/",
+			"div[last()]/div[@class='map']")
+	} else {
+
+		bracketXp <- "//*[contains(@class,'wikitable matchlist')]"
+		allGamesXp <- "tr[contains(@class,'match')]/td[2]/div[1]"
+		logXp <- paste0("div[contains(@class,'matches')]/",
+			"div[last()]/div[1]")
+	}
 
 	brNodes <- rvest::html_nodes(page, xpath = bracketXp)
 	nodes <- rvest::html_nodes(brNodes, xpath = allGamesXp)
 
-	rawTitles <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
+	if(scrapeLoc == "Tourney"){
+		rawTitles <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
 
-	spaceSet <- grepl("^\\s+", rawTitles)
-	nodes <- nodes[!spaceSet]
+		spaceSet <- grepl("^\\s+", rawTitles)
+		nodes <- nodes[!spaceSet]
+	}
 
-	ids <- parseBracketColumns(nodes)
+	logNodes <- rvest::html_nodes(nodes, xpath = logXp)
+
+	ids <- parseLogLink(logNodes)
 
 
 
 	if(withNames){
-		enuNames <- getMatchNames(nodes)
+		enuNames <- switch(scrapeLoc,
+			Tourney = getTourneyNames(nodes),
+			Season = getSeasonNames(brNodes, allGamesXp, logXp)
+		)
 		if(length(enuNames) != length(ids)){
-			stop("Naming logs in comp.tf bracket extract screwed up")
+			stop("Naming logs in comp.tf extract screwed up")
 		}
 		names(ids) <- enuNames
 	}
@@ -148,9 +167,8 @@ getLogIDsComptf <- function(
 	return(ids)
 }
 
-parseBracketColumns <- function(colNodes){
-	logXp <- paste0("div[not(position()=1)]/div[2]/div[last()]/div[last()]/",
-		"div[@class='map']/a[contains(@href,'logs.tf')]")
+parseLogLink <- function(colNodes){
+	logXp <- "a[contains(@href,'logs.tf')]"
 
 	ids <- rvest::html_attr(
 		rvest::html_nodes(colNodes, xpath = logXp),
@@ -160,7 +178,7 @@ parseBracketColumns <- function(colNodes){
 	return(ids)
 }
 
-getMatchNames <- function(nodes){
+getTourneyNames <- function(nodes){
 
 	baseLabel <- rvest::html_text(rvest::html_node(nodes, xpath = "div[1]/div[1]"))
 
@@ -188,4 +206,29 @@ getMatchNames <- function(nodes){
 
 	return(logLabels)
 
+}
+
+getSeasonNames <- function(nodes, gamesXp, logXp){
+	baseLabel <- paste0("Week", 1:length(nodes))
+
+	logLabels <- mapply(function(node, nam){
+		matchNs <- rvest::html_nodes(node, xpath = gamesXp)
+		out <- paste0(rep(nam, length(matchNs)), " match", 1:length(matchNs))
+
+		out <- mapply(function(node, nam){
+			mapNs <- rvest::html_nodes(node, xpath = logXp)
+			ids <- parseLogLink(mapNs)
+			if(length(ids) > 0){
+				return(paste0(rep(nam, length(mapNs)), " map", 1:length(ids)))
+			} else {
+				return("")
+			}
+
+		}, matchNs, out)
+
+	},nodes, baseLabel)
+
+	logLabels <- c(logLabels, recursive = TRUE)
+	logLabels <- gsub("\\s", "_", logLabels)
+	logLabels <- logLabels[nzchar(logLabels)]
 }

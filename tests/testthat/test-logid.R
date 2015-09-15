@@ -17,10 +17,21 @@ test_that("comp.tf scraping gets Tourney IDs right",{
 	expect_true(is.character(logIDs))
 })
 
-test_that("comp.tf scraping gets Tourney IDs right",{
+test_that("comp.tf scraping gets Tourney Names right",{
 	logIDs <- getLogIDsComptf("Insomnia52", withNames = TRUE, shReDownload = TRUE)
 
 	expect_equal(length(logIDs), 52)
 	expect_true(is.character(logIDs))
 	expect_true(any(grepl("Grand", names(logIDs))))
+})
+
+test_that("comp.tf scraping gets Season Names right",{
+	logIDs <- getLogIDsComptf("ETF2L_6v6_Season_21",
+    withNames = TRUE,
+    shReDownload = TRUE,
+    scrapeLoc = "Season")
+
+  expect_equal(length(logIDs), 60)
+	expect_true(is.character(logIDs))
+	expect_true(any(nzchar(names(logIDs))))
 })
