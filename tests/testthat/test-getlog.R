@@ -9,6 +9,7 @@ test_that("Parses log correctly", {
   expect_true(is.double(lgtf$table))
   expect_false(is.null(colnames(lgtf$table)))
   expect_false(is.null(rownames(lgtf$table)))
+  expect_false(all(is.na(lgtf$table)))
 
   leftOverComplex <- vapply(lgtf$players[[1]], function(x){
     is.data.frame(x) | is.list(x)

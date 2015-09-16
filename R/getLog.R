@@ -88,8 +88,8 @@ cleanLogMat <- function(lplayer, teamNames){
 # Check if log is incomplete / corrupted
 verifyLog <- function(log){
 
-	numFromMed <- length(c(log$healspread, recursive = TRUE))
-		+ length(log$healspread)
+	numFromMed <- (length(c(log$healspread, recursive = TRUE))
+		+ length(log$healspread))
 	numFromPly <- length(log$players)
 	goodMedStat <- (numFromPly == numFromMed)
 
@@ -115,8 +115,9 @@ aggregateStats <- function(lmatch, statFun = mean){
 	allPlayerNames <- unique(c(lPlayers, recursive = TRUE))
 
 	gamesPlayed <- vapply(allPlayerNames, function(nam){
+		reg <- gsub("\\[|\\]", "", nam)
 		didParticipate <- vapply(lPlayers, function(logPlys){
-			any(grepl(nam, logPlys))
+			any(grepl(reg, logPlys))
 		}, TRUE)
 		sum(didParticipate)
 	}, 1)

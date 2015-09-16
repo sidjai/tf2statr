@@ -11,10 +11,13 @@ Description: logs.tf and sizzling stats are great match stats plugins however
   websites and APIs. Even for single matches, this package
   parses the information into R for further analysis.
 License: GPL (>= 2)
-Imports:
+Imports: 
   jsonlite,
   xml2,
   rvest(>= 0.3.0),
   twitteR
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
 LazyData: true
+VignetteBuilder: knitr

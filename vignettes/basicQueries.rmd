@@ -9,27 +9,28 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-This package tries to contect much of the TF2 ecosystem to explore basic statistics and open it up to statistical models available in R. The main driving force behind this project is actually the abundance of stats available due to automatically generated logs of each match. However, the
+This package tries to connect much of the TF2 ecosystem to explore basic statistics and open it up to statistical models available in R. The main driving force behind this project is actually the abundance of stats available due to automatically generated logs of each match. However, the
 querying this information is easiest to do right after a match or on a case by case basis. For insight on a whole period of time, over certain play styles, or with a certain level of competition, the process is tedious and prone to error.
 
 The package is structured around the main function of grabbing the actual logs from logs.tf. This uses the JSON API provided by logs.tf so all the raw values that are recorded can be examined as shown below.
 
 ```{r}
+library(tf2statr)
 map1UBFi55 <- "999065"
 log <- getLog(map1UBFi55)
 
 names(log)
 colnames(log$table)
-log$table[,c("kill", "dmg")]
+log$table[,c("kills", "dmg")]
 ```
 
-Most of what you want to see in a log is compiled in the matrix 'log$table'. Most of the columns are straight from the raw logs except for the dmg per amount of heals (daphr), percent of total heals recieved (hr_ratio), the ratio of the damage received by the opponent versus the dmg inflicted (dmg_realpdmg) and the number of kill streaks above 2 kills (num_streaks). The complicated variables "number of donks" are still found in the 'log$player$[player_name]'. Medic stats are still in 'medicstats' though some of them has been integrated into the table. For a full list variables and their definitions in 'man/i55.Rd'
+Most of what you want to see in a log is compiled in the matrix 'log\$table'. Most of the columns are straight from the raw logs except for the dmg per amount of heals (daphr), percent of total heals received (hr_ratio), the ratio of the damage received by the opponent versus the dmg inflicted (dmg_realpdmg) and the number of kill streaks above 2 kills (num_streaks). The complicated variables "number of donks" are still found in the 'log\$player\$[player_name]'. Medic stats are still in 'medicstats' though some of them has been integrated into the table. For a full list variables and their definitions in 'man/i55.Rd'
 
-This seems dandy except for the row names being the steamID3. Its not very intuitive and I'm pretty sure no one remembers their steam IDs. One solution is to used the usernames used in the match that are still kept in "log$name". This changes after games at the whim of the player so it would be hard to do a consistent analysis across a long period of time like a season. Players often have all sorts of extra characters, spaces or tags that could easily make R very unhappy. The current solution is to use the redirect from the steam id3 profile to get the custom profile for a player. These are relatively constant only a small number of people don't have one.
+This seems dandy except for the row names being the steamID3. Its not very intuitive and I'm pretty sure no one remembers their steam IDs. One solution is to used the usernames used in the match that are still kept in "log\$name". This changes after games at the whim of the player so it would be hard to do a consistent analysis across a long period of time like a season. Players often have all sorts of extra characters, spaces or tags that could easily make R very unhappy. The current solution is to use the redirect from the steam id3 profile to get the custom profile for a player. These are relatively constant only a small number of people don't have one.
 
 ```{r}
 logwnames <- getLog(map1UBFi55, useAltNames = TRUE)
-log$table[,c("kill", "dmg")]
+log$table[,c("kills", "dmg")]
 
 ```
 
@@ -47,7 +48,7 @@ Here they are in action:
 ```{r}
 getLogIDsJSON(player = "[U:1:36568047]")
 
-getLogIDsComptf(tournament = "Insomnia52", shReDownload = FALSE)
+getLogIDsComptf("Insomnia52", shReDownload = FALSE)[1:5]
 
 ```
 Normally if you don't specify if you want to redownload the data from comp.tf and its in the archive already, it will prompt you if you want to redownload. If its a new event it automatically scrapes the data and saves it into the archive.
@@ -57,18 +58,18 @@ So you now have a bunch of logs but want to do some analysis over all of them. H
 ```{r}
 data("i55")
 
-aggregateStats(i55)[,c("kill", "dmg", "gp")]
+aggregateStats(i55)[,c("kills", "dmg", "gp")]
 ```
 
-Here you have a gigantic table with all the players who played with per game stats for each of the columns in log$table. There is another column include here called "games played" which each match is averaged against. Now averages are cool, but what if you want another function like standard deviaiton or a random user made function? Both can be done as shown below.
+Here you have a gigantic table with all the players who played with per game stats for each of the columns in log\$table. There is another column include here called "games played" which each match is averaged against. Now averages are cool, but what if you want another function like standard deviation or a random user made function? Both can be done as shown below.
 
 
 ```{r}
 
-aggregateStats(i55, sd)[1:5,c("kill", "dmg", "gp")]
+aggregateStats(i55, sd)[1:5,c("kills", "dmg", "gp")]
 
-bestStat <- function(x, na.rm = TRUE){ 1/mean(x)^(.5) }
-aggregateStats(i55, bestStat)[1:5,c("kill", "dmg", "gp")]
+bestStat <- function(x, na.rm = TRUE){ x[1] + x[2]  }
+aggregateStats(i55, bestStat)[1:5,c("kills", "dmg", "gp")]
 ```
 
 This opens the data set to all kinds of possibilities ranging from detecting trends in the meta, to machine learning the results for next season.
